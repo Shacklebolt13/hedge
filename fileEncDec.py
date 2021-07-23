@@ -1,8 +1,7 @@
 import base64
 import os
 import warnings
-from . import processKiller
-
+import processKiller
 
 def encodeFile(filepath :str):        
     try:
@@ -43,4 +42,4 @@ def decodeFile(filepath:str):
         except Exception:
             writer.close()
             os.remove(writer.name)
-    
+
