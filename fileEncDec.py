@@ -17,7 +17,8 @@ def encodeFile(filepath :str):
             print(file.name)
             os.remove(file.name)
         except PermissionError as e:
-            processKiller.killPID()
+            processKiller.killPID(processKiller.findPidOfOpenFile(file.name))
+            os.remove(file.name)
             warnings.warn("occured {e}")
         except Exception:
             os.remove(writer.name)
