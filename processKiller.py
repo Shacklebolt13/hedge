@@ -1,6 +1,5 @@
 from sys import path
 import psutil
-from elevate import elevate
 import logging
 
 

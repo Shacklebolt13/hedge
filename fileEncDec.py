@@ -1,46 +1,53 @@
 import base64
+import logging
 import os
-import warnings
 import processKiller
 
-def encodeFile(filepath :str):        
-    try:
-        open(filepath+".ncod",'x')
-    except FileExistsError:
-        pass
-    
-    with open(filepath,'rb') as file , open(filepath+".ncod",'wb') as writer:
+def encodeFile(filepath :str,retries=5):
+    '''
+    encodes a file in base64 with a displacement text, it as filename.ncod
+    '''        
+    _DISPLACEMENT_TEXT=b"You ARE NOt SuPpOSed To Read ThiS!!"
+    _file=None
+
+    for _ in range(0,retries):
         try:
-            writer.write(base64.b64encode(file.read()))
-            writer.close()
-            file.close()
-            print(file.name)
-            os.remove(file.name)
-        except PermissionError as e:
-            processKiller.killPID(processKiller.findPidOfOpenFile(file.name))
-            os.remove(file.name)
-            warnings.warn("occured {e}")
-        except Exception:
-            os.remove(writer.name)
+            _file=open(filepath,'r+b')
+            _material=_DISPLACEMENT_TEXT+base64.b64encode(_file.read())
+            _file.seek(0,0)
+            _file.truncate()
+            _file.write(_material)
+            _file.close()
+            os.rename(filepath,filepath+".ncod")
+            del _material
+            break
+        except Exception as e:
+            logging.warn("occured {e}")
+            _file.close()
+            processKiller.killPID(filepath)
 
 
 
-def decodeFile(filepath:str):
-    try:
-        open(filepath,'x')
-    except FileExistsError:
-        pass
-    with open(filepath+".ncod",'rb') as file , open(filepath,'wb') as writer:
+def decodeFile(filepath :str,retries=5):
+    '''
+    decodes a file in base64 with a displacement text, it as filename (removes .ncod)
+    '''        
+    _DISPLACEMENT_TEXT=b"You ARE NOt SuPpOSed To Read ThiS!!"
+    _file=None
+
+    for _ in range(0,retries):
         try:
-            writer.write(base64.b64decode(file.read()))
-            writer.close()
-            file.close()
-            print(file.name)
-            os.remove(file.name)
-        except PermissionError as e:
-            processKiller.killPID()
-            warnings.warn("occured {e}")
-        except Exception:
-            writer.close()
-            os.remove(writer.name)
-
+            _file=open(filepath+".ncod",'r+b')
+            _file.seek(len(_DISPLACEMENT_TEXT),0)
+            _material=base64.b64decode(_file.read())
+            _file.seek(0,0)
+            _file.truncate()
+            _file.write(_material)
+            _file.close()
+            del _material
+            os.rename(filepath+".ncod",filepath)
+            break
+        except Exception as e:
+            logging.warn("occured {e}")
+            _file.close()
+            processKiller.killPID(filepath)
