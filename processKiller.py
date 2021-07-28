@@ -1,14 +1,22 @@
 from sys import path
 import psutil
 from elevate import elevate
+import logging
+
+
 
 def killPID(pid):
+    logging.debug(f"killing process Id: {pid}")
     if(pid == -1):
         print("Can't Kill Process")
+        return
     try:
         psutil.Process(pid).terminate()
     except psutil.NoSuchProcess:
-        pass    #TODO warn or debug print
+        logging.warn(f"Couldn't kill process with PID {{pid}} REASON: NO SUCH PROCESS")    #TODO warn or debug print
+    except Exception as e:
+        print(e)
+
 
 
 def findPidOfOpenFile(fileName):
@@ -19,7 +27,3 @@ def findPidOfOpenFile(fileName):
         except psutil.AccessDenied:
             continue
     return -1
-
-print(findPidOfOpenFile("ss"))
-#elevate(show_console=False)
-print("ss")
